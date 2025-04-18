@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\documentContext;
+namespace App\Actions\DocumentContext;
 
 use Aws\Credentials\Credentials;
 use Aws\Textract\TextractClient;
