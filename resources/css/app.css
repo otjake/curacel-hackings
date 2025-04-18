@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pay-blue: #1A1AFF;
+}
+[x-cloak] {
+    display: none;
+}
+
+/* Default styles for all screens */
+.custom-sweetalert-popup-class {
+    text-align: center;
+  }
+  
+  /* Apply custom styles only for screens wider than 700px */
+  @media (min-width: 700px) {
+    .custom-sweetalert-popup-class {
+      width: 25%;
+      max-width: none;
+      padding-bottom: 150px;
+      border-radius: 10px;
+      position: fixed;
+      top: 10px;
+      bottom: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+  }

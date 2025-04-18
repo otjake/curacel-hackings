@@ -1,0 +1,29 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "database/migrations",
+        "config",
+        "public",
+        "resources",
+        "bootstrap",
+        "storage",
+        "app/Actions/Fortify",
+        "app/Actions/Jetstream"
+    ],
+    "rules": {
+        "no_superfluous_phpdoc_tags": false,
+        "phpdoc_single_line_var_spacing": false,
+        "phpdoc_separation": true,
+        "phpdoc_align": {
+            "align": "left"
+        },
+        "class_attributes_separation": {
+            "elements": {
+                "method": "one",
+                "trait_import": "none"
+            }
+        },
+        "no_superfluous_elseif": true,
+        "return_assignment": true
+    }
+}

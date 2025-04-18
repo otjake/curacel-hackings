@@ -1,0 +1,55 @@
+id: 51382
+name: curacel-pay
+environments:
+    production:
+        memory: 1024
+        cli-memory: 512
+        runtime: docker
+        dockerfile: Dockerfile
+        database: pay-database
+        storage: pay.curacel.co
+        network: claims-network
+        domain: pay.curacel.co
+        separate-vendor: false
+        timeout: 80
+        build:
+            - 'composer install --no-dev'
+            - 'php artisan event:cache'
+            - 'npm ci && npm run build && rm -rf node_modules'
+        deploy:
+            - 'php artisan migrate --force'
+
+    sandbox:
+        memory: 1024
+        cli-memory: 512
+        runtime: docker
+        dockerfile: Dockerfile
+        database: claims-api
+        domain: sandbox.pay.curacel.co
+        network: claims-network
+        storage: sandbox.pay.curacel.co
+        separate-vendor: false
+        build:
+            - 'composer install --no-dev'
+            - 'php artisan event:cache'
+            - 'npm ci && npm run build && rm -rf node_modules'
+        deploy:
+            - 'php artisan migrate --force'
+
+    dev:
+        memory: 1024
+        cli-memory: 512
+        timeout: 80
+        runtime: docker
+        dockerfile: Dockerfile
+        database: claims-api
+        domain: dev.pay.curacel.co
+        storage: dev.pay.curacel.co
+        network: claims-network
+        separate-vendor: false
+        build:
+            - 'composer install --no-dev'
+            - 'php artisan event:cache'
+            - 'npm ci && npm run build && rm -rf node_modules'
+        deploy:
+            - 'php artisan migrate'
