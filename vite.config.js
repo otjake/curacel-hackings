@@ -4,7 +4,20 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
     build: {
-        chunkSizeWarningLimit: 1000, // in KB
+        chunkSizeWarningLimit: 3000, // in KB
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor': [
+                        'vue',
+                        '@inertiajs/vue3',
+                        'chart.js',
+                        'flowbite',
+                        '@vuepic/vue-datepicker'
+                    ]
+                }
+            }
+        }
     },
     plugins: [
         laravel({
@@ -20,4 +33,7 @@ export default defineConfig({
             },
         }),
     ],
+    optimizeDeps: {
+        include: ['vue', '@inertiajs/vue3', 'chart.js', 'flowbite', '@vuepic/vue-datepicker']
+    }
 });
