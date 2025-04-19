@@ -13,9 +13,9 @@ import Swal from 'sweetalert2';
 
 window.Swal = Swal;
 
-const successIcon = new URL(`../icons/success.svg`, import.meta.url).href;
-const processingIcon = new URL(`../icons/processing.svg`, import.meta.url).href;
-const errorIcon = new URL(`../icons/error.svg`, import.meta.url).href;
+import successIcon from '../icons/success.svg';
+import processingIcon from '../icons/processing.svg';
+import errorIcon from '../icons/error.svg';
 
 const SuccessAlert = Swal.mixin({
     iconColor: "#FFFFFF",

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
     build: {
@@ -32,8 +33,12 @@ export default defineConfig({
                 },
             },
         }),
+        svgLoader(),
     ],
     optimizeDeps: {
         include: ['vue', '@inertiajs/vue3', 'chart.js', 'flowbite', '@vuepic/vue-datepicker']
+    },
+    define: {
+        'process.env': {}
     }
 });
