@@ -105,7 +105,7 @@ class GptService
         $messages = [
             [
                 'role' => 'system',
-                'content' => 'You are a helpful assistant that analyzes document content and provides accurate answers based on the provided context. Focus on the specific information relevant to the question.'
+                'content' => 'You are a helpful assistant that analyzes document content and provides accurate answers based on the provided context. Format your response using HTML tags for better presentation. Use appropriate HTML tags like <p> for paragraphs, <ul> and <li> for lists, <strong> for emphasis, <h1> to <h6> for headings, and <br> for line breaks. Make sure to properly close all HTML tags.'
             ],
             [
                 'role' => 'user',

@@ -110,7 +110,7 @@
             <h3 class="mb-2 text-lg font-medium text-gray-900">Analysis Result</h3>
             <div class="p-4 bg-gray-50 rounded-lg">
               <div class="max-w-none prose">
-                <p class="text-gray-700 whitespace-pre-wrap">{{ analysisResult }}</p>
+                <div v-html="analysisResult"></div>
               </div>
             </div>
           </div>
@@ -125,11 +125,25 @@
             </button>
             <button
               @click="processDocuments"
-              :disabled="!prompt"
+              :disabled="!prompt || isProcessing"
               class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md border border-transparent shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Process Documents
+              <span v-if="isProcessing">Processing...</span>
+              <span v-else>Process Documents</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="isProcessing || isExtracting" class="flex fixed inset-0 justify-center items-center bg-gray-500 bg-opacity-75">
+          <div class="p-6 text-center bg-white rounded-lg shadow-xl">
+            <div class="mx-auto mb-4 w-12 h-12 rounded-full border-b-2 border-indigo-600 animate-spin"></div>
+            <p class="font-medium text-gray-700">
+              {{ isProcessing ? currentLoadingMessage : 'Extracting content...' }}
+            </p>
+            <p class="mt-2 text-sm text-gray-500">
+              {{ isProcessing ? 'This may take a few moments...' : 'Please wait while we extract the content...' }}
+            </p>
           </div>
         </div>
 
@@ -145,7 +159,7 @@
               </button>
             </div>
             <div class="p-4 overflow-y-auto max-h-[60vh]">
-              <pre class="text-sm text-gray-700 whitespace-pre-wrap">{{ selectedDocument.content }}</pre>
+              <div v-html="selectedDocument.content"></div>
             </div>
           </div>
         </div>
@@ -173,6 +187,15 @@ const isProcessing = ref(false)
 const isExtracting = ref(false)
 const selectedDocument = ref(null)
 const analysisResult = ref(null)
+const currentLoadingMessage = ref('')
+const loadingMessages = [
+  'Analyzing document structure...',
+  'Extracting key information...',
+  'Identifying patterns and relationships...',
+  'Processing context and meaning...',
+  'Generating insights...',
+  'Almost there...'
+]
 
 // Watch for changes in selected documents
 watch(selectedDocuments, (newSelected) => {
@@ -216,6 +239,7 @@ const handleFileUpload = async (event) => {
     formData.append('documents[]', file)
   })
 
+  isProcessing.value = true
   try {
     const response = await axios.post(route('document-context.upload'), formData, {
       headers: {
@@ -228,6 +252,8 @@ const handleFileUpload = async (event) => {
   } catch (error) {
     console.error('Error uploading files:', error)
     alert(error.response?.data?.message || 'Failed to upload files. Please try again.')
+  } finally {
+    isProcessing.value = false
   }
 }
 
@@ -251,30 +277,40 @@ const formatFileSize = (bytes) => {
 }
 
 const processDocuments = async () => {
-  if ((uploadedDocuments.value.length + selectedDocuments.value.length) < 2 || !prompt.value) {
-    alert('Please select or upload at least 2 documents and provide a prompt')
-    return
-  }
-
   isProcessing.value = true
   analysisResult.value = null
+  let messageIndex = 0
+
+  // Start the message rotation
+  const messageInterval = setInterval(() => {
+    currentLoadingMessage.value = loadingMessages[messageIndex]
+    messageIndex = (messageIndex + 1) % loadingMessages.length
+  }, 2000)
 
   try {
-    // Get documents that have content extracted from both uploaded and selected documents
-    const documentsWithContent = [
-      ...uploadedDocuments.value.filter(doc => doc.content),
-      ...uploadedDocuments.value.filter(doc =>
-        selectedDocuments.value.includes(doc.id) && doc.content
+    // Merge all documents (uploaded and selected from existing)
+    const allDocuments = [
+      ...uploadedDocuments.value,
+      ...existingDocuments.value.filter(doc => 
+        selectedDocuments.value.includes(doc.id)
       )
     ]
 
-    // Remove duplicates based on document ID
-    const uniqueDocuments = [...new Map(documentsWithContent.map(doc => [doc.id, doc])).values()]
-
-    if (uniqueDocuments.length === 0) {
-      alert('Please extract content from at least one document before processing')
+    // Check if we have at least 2 documents and a prompt
+    if (allDocuments.length < 2 || !prompt.value) {
+      alert('Please select or upload at least 2 documents and provide a prompt')
       return
     }
+
+    // Check if all documents have content
+    const documentsWithContent = allDocuments.filter(doc => doc.content)
+    if (documentsWithContent.length !== allDocuments.length) {
+      alert('Please extract content from all documents before processing')
+      return
+    }
+
+    // Remove duplicates based on document ID
+    const uniqueDocuments = [...new Map(documentsWithContent.map(doc => [doc.id, doc])).values()]
 
     const response = await axios.post('/api/document-context/process', {
       document_ids: uniqueDocuments.map(doc => doc.id),
@@ -285,8 +321,14 @@ const processDocuments = async () => {
     analysisResult.value = response.data.result
   } catch (error) {
     console.error('Error processing documents:', error)
+    if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat()
+        alert(errorMessages.join('\n'))
+    }
     alert(error.response?.data?.message || 'Failed to process documents. Please try again.')
   } finally {
+    clearInterval(messageInterval)
+    currentLoadingMessage.value = ''
     isProcessing.value = false
   }
 }

@@ -35,7 +35,7 @@ class DocumentContextController extends Controller
         Log::info('Uploading documents');
         $validator = Validator::make($request->all(), [
             'documents' => 'required|array|min:1',
-            'documents.*' => 'required|file|mimes:pdf,docx,txt|max:10240', // 10MB max
+            'documents.*' => 'required|file|mimes:pdf|max:10240', // 10MB max
         ]);
 
         if ($validator->fails()) {
@@ -188,27 +188,34 @@ class DocumentContextController extends Controller
             // Step 1: Get individual summaries for each document
             $documentSummaries = [];
             foreach ($documents as $document) {
-                try {
-                    $summary = $this->gptService->getGptAnalysis(
-                        $document->file_extract,
-                        "Please provide a summary of this document that is relevant to the following question: " . $request->prompt
-                    );
-                } catch (\Exception $e) {
-                    Log::warning('GPT failed, falling back to Gemini: ' . $e->getMessage());
-                    // $summary = $this->geminiService->analyzeText(
-                    //     $document->file_extract,
-                    //     "Please provide a summary of this document that is relevant to the following question: " . $request->prompt
-                    // );
+                if(!$document->file_extract) {
+                    Log::warning('Document with name' . $document->file_name . ' has no extracted content');
+                    return response()->json([
+                        'message' => 'Document with name' . $document->file_name . ' has no extracted content',
+                        'errors' => ['documents' => ['Please ensure all documents have been processed for content extraction']]
+                    ], 422);
                 }
-                $documentSummaries[] = $document->file_name . " - " . $summary;
-                Log::info('Document summary: ' . $document->file_name . " - " . $summary);
+                // try {
+                //     $summary = $this->gptService->getGptAnalysis(
+                //         $document->file_extract,
+                //         "Please provide a summary of this document that is relevant to the following question: " . $request->prompt
+                //     );
+                // } catch (\Exception $e) {
+                //     Log::warning('GPT failed, falling back to Gemini: ' . $e->getMessage());
+                //     // $summary = $this->geminiService->analyzeText(
+                //     //     $document->file_extract,
+                //     //     "Please provide a summary of this document that is relevant to the following question: " . $request->prompt
+                //     // );
+                // }
+                $documentSummaries[] = $document->file_name . " - " . $document->file_extract;
+                Log::info('Document summary: ' . $document->file_name . " - " . $document->file_extract);
             }
 
             // Step 2: Analyze all summaries together to provide a final answer
             try {
                 $finalAnalysis = $this->gptService->getGptAnalysis(
                     implode("\n\n", $documentSummaries),
-                    "Based on the following document summaries, please provide a comprehensive answer to: " . $request->prompt
+                    "Based on the following document extracts, please provide a comprehensive answer to the following question: " . $request->prompt
                 );
             } catch (\Exception $e) {
                 Log::warning('GPT failed for final analysis, falling back to Gemini: ' . $e->getMessage());

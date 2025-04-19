@@ -26,27 +26,13 @@ class ExtractTextFromFile
      */
     public function __construct()
     {
+        $config = config('textract');
 
-        // Get credentials from config
-        $awsKey = env('TEXTTRACT_ACCESS_KEY_ID');
-        $awsSecret = env('TEXTTRACT_SECRET_ACCESS_KEY');
-        $awsRegion = env('TEXTTRACT_DEFAULT_REGION');
-
-        if (empty($awsKey) || empty($awsSecret)) {
-            throw new \RuntimeException('AWS credentials are not properly configured');
+        if (empty($config) || empty($config['credentials']) || empty($config['credentials']['key']) || empty($config['credentials']['secret'])) {
+            throw new \RuntimeException('AWS Textract configuration is not properly configured');
         }
 
-        $this->textractClient = new TextractClient([
-            'credentials' => [
-                'key'    => $awsKey,
-                'secret' => $awsSecret,
-            ],
-            'version' => 'latest',
-            'region' => $awsRegion,
-            // 'http' => [
-            //     'verify' => false // Only if you're having SSL verification issues
-            // ]
-        ]);
+        $this->textractClient = new TextractClient($config);
     }
 
     /**
