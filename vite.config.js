@@ -36,9 +36,12 @@ export default defineConfig({
         svgLoader(),
     ],
     optimizeDeps: {
-        include: ['vue', '@inertiajs/vue3', 'chart.js', 'flowbite', '@vuepic/vue-datepicker']
+        include: ['vue', '@inertiajs/vue3', 'chart.js', 'flowbite', '@vuepic/vue-datepicker'],
+        exclude: []
     },
-    define: {
-        'process.env': {}
+    server: {
+        hmr: {
+            overlay: false
+        }
     }
 });
