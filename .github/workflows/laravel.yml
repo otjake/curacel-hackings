@@ -47,8 +47,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
             cd /var/www/curacel-hackings/
             git pull origin main
