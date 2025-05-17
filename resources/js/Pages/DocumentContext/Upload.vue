@@ -3,7 +3,7 @@
     <div class="px-4 py-12 min-h-screen bg-gray-50 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-3xl">
         <div class="mb-8 text-center">
-          <h1 class="text-3xl font-bold text-gray-900">Document Context AI</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Document Context AI CI/CD</h1>
           <p class="mt-2 text-sm text-gray-600">
             Upload multiple documents and leverage their context to enhance your work
           </p>
